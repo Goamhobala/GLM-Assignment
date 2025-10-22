@@ -1,0 +1,366 @@
+
+\documentclass[12pt,halfline,a4paper,]{ouparticle}
+
+% Packages I think are necessary for basic Rmarkdown functionality
+\usepackage{hyperref}
+\usepackage{graphicx}
+\usepackage{listings}
+\usepackage{xcolor}
+\usepackage{fancyvrb}
+\usepackage{framed}
+
+% Link coloring
+\hypersetup{breaklinks=true,
+            bookmarks=true,
+            pdfauthor={},
+            pdftitle={STA304XS - Assignment 2: Machine Learning}
+            }
+
+
+%% To allow better options for figure placement
+%\usepackage{float}
+
+% Packages that are supposedly required by OUP sty file
+\usepackage{amssymb, amsmath, geometry, amsfonts, verbatim, endnotes, setspace}
+
+% use upquote if available, for straight quotes in verbatim environments
+\IfFileExists{upquote.sty}{\usepackage{upquote}}{}
+
+% Macros for dealing with affiliations, footnotes, etc.
+\makeatletter
+\def\Newlabel#1#2#3{\expandafter\gdef\csname #1@#2\endcsname{#3}}
+
+\def\Ref#1#2{\@ifundefined{#1@#2}{???}{\csname #1@#2\endcsname}}
+
+\newcommand*\samethanks[1][\value{footnote}]{\footnotemark[#1]}
+
+\newcommand*\ifcounter[1]{%
+  \ifcsname c@#1\endcsname
+    \expandafter\@firstoftwo
+  \else
+    \expandafter\@secondoftwo
+  \fi
+}
+
+\newcommand*\thanksbycode[1]{%
+  \ifcounter{FNCT@#1}
+    {\samethanks[\value{FNCT@#1}]}
+    {\thanks{\Ref{FN}{#1}}\newcounter{FNCT@#1}\setcounter{FNCT@#1}{\value{footnote}}}
+}
+
+% Create labels for Addresses if the are given in Elsevier format
+
+% Create labels for Footnotes if the are given in Elsevier format
+
+% Part for setting citation format package: natbib
+
+% Part for setting citation format package: biblatex
+
+% Pandoc syntax highlighting
+\usepackage{color}
+\usepackage{fancyvrb}
+\newcommand{\VerbBar}{|}
+\newcommand{\VERB}{\Verb[commandchars=\\\{\}]}
+\DefineVerbatimEnvironment{Highlighting}{Verbatim}{commandchars=\\\{\}}
+% Add ',fontsize=\small' for more characters per line
+\usepackage{framed}
+\definecolor{shadecolor}{RGB}{248,248,248}
+\newenvironment{Shaded}{\begin{snugshade}}{\end{snugshade}}
+\newcommand{\AlertTok}[1]{\textcolor[rgb]{0.94,0.16,0.16}{#1}}
+\newcommand{\AnnotationTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textbf{\textit{#1}}}}
+\newcommand{\AttributeTok}[1]{\textcolor[rgb]{0.13,0.29,0.53}{#1}}
+\newcommand{\BaseNTok}[1]{\textcolor[rgb]{0.00,0.00,0.81}{#1}}
+\newcommand{\BuiltInTok}[1]{#1}
+\newcommand{\CharTok}[1]{\textcolor[rgb]{0.31,0.60,0.02}{#1}}
+\newcommand{\CommentTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textit{#1}}}
+\newcommand{\CommentVarTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textbf{\textit{#1}}}}
+\newcommand{\ConstantTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{#1}}
+\newcommand{\ControlFlowTok}[1]{\textcolor[rgb]{0.13,0.29,0.53}{\textbf{#1}}}
+\newcommand{\DataTypeTok}[1]{\textcolor[rgb]{0.13,0.29,0.53}{#1}}
+\newcommand{\DecValTok}[1]{\textcolor[rgb]{0.00,0.00,0.81}{#1}}
+\newcommand{\DocumentationTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textbf{\textit{#1}}}}
+\newcommand{\ErrorTok}[1]{\textcolor[rgb]{0.64,0.00,0.00}{\textbf{#1}}}
+\newcommand{\ExtensionTok}[1]{#1}
+\newcommand{\FloatTok}[1]{\textcolor[rgb]{0.00,0.00,0.81}{#1}}
+\newcommand{\FunctionTok}[1]{\textcolor[rgb]{0.13,0.29,0.53}{\textbf{#1}}}
+\newcommand{\ImportTok}[1]{#1}
+\newcommand{\InformationTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textbf{\textit{#1}}}}
+\newcommand{\KeywordTok}[1]{\textcolor[rgb]{0.13,0.29,0.53}{\textbf{#1}}}
+\newcommand{\NormalTok}[1]{#1}
+\newcommand{\OperatorTok}[1]{\textcolor[rgb]{0.81,0.36,0.00}{\textbf{#1}}}
+\newcommand{\OtherTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{#1}}
+\newcommand{\PreprocessorTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textit{#1}}}
+\newcommand{\RegionMarkerTok}[1]{#1}
+\newcommand{\SpecialCharTok}[1]{\textcolor[rgb]{0.81,0.36,0.00}{\textbf{#1}}}
+\newcommand{\SpecialStringTok}[1]{\textcolor[rgb]{0.31,0.60,0.02}{#1}}
+\newcommand{\StringTok}[1]{\textcolor[rgb]{0.31,0.60,0.02}{#1}}
+\newcommand{\VariableTok}[1]{\textcolor[rgb]{0.00,0.00,0.00}{#1}}
+\newcommand{\VerbatimStringTok}[1]{\textcolor[rgb]{0.31,0.60,0.02}{#1}}
+\newcommand{\WarningTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textbf{\textit{#1}}}}
+
+% tightlist command for lists without linebreak
+\providecommand{\tightlist}{%
+  \setlength{\itemsep}{0pt}\setlength{\parskip}{0pt}}
+
+
+
+\usepackage{booktabs}
+
+\begin{document}
+
+\title{STA304XS - Assignment 2: Machine Learning}
+
+\author{%
+%
+% Code for old style authors field
+%
+% Add \and if both authors and author
+%
+%
+% Code for new (elsevier) style author field
+\name{Jing Yeh}
+%
+\email{\href{mailto:yhxjin001@myuct.ac.za}{yhxjin001@myuct.ac.za}}%
+%
+%
+%
+\and
+\name{Saurav Sathnarayan}
+%
+\email{\href{mailto:sthsau001@myuct.ac.za}{sthsau001@myuct.ac.za}}%
+%
+%
+%
+%
+}
+
+\abstract{This assignment explores two machine learning problems. First,
+we analyse vehicle braking performance data using decision trees and
+feed-forward neural networks to predict stopping distance based on
+speed, brand, and licence type. We tune model complexity and
+regulariaation parameters. Second, we apply Lloyd's K-means algorithm to
+segment a wine dataset into natural groupings based on their properties,
+using the elbow method and silhouette scores to determine the optimal
+number of clusters.}
+
+\date{2025-10-10}
+
+\keywords{Decision Trees, Neural Networks, K-Means Clustering, R,
+Supervised Learning, Unsupervised Learning}
+
+\maketitle
+
+
+
+\begin{center}\includegraphics[width=400px]{leclerc} \end{center}
+\newpage
+\tableofcontents
+\newpage
+
+\section{Question 1: Exploratory Data
+Analysis}\label{question-1-exploratory-data-analysis}
+
+\subsection{Part (a)}\label{part-a}
+
+\includegraphics[width=1\linewidth]{skeleton_files/figure-latex/q1a-plots-1}
+\includegraphics[width=1\linewidth]{skeleton_files/figure-latex/q1a-plots-2}
+
+\subsection{Part (b)}\label{part-b}
+
+Based visual inspection, we could see that the faster the car was moving
+(higher speed) the greater the distance required to stop the car. Speed
+and distance seem to be positively and linearly correlated. We can't see
+much difference between the distance required for the different types of
+licence held by the drivers. However, brand wise, it looks like bRambo
+outperforms their competitors.
+
+\section{Question 2: Decision Trees \& Neural
+Networks}\label{question-2-decision-trees-neural-networks}
+
+\subsection{Part (a)}\label{part-a-1}
+
+\includegraphics[width=1\linewidth]{skeleton_files/figure-latex/q2a-unpruned-tree-1}
+
+\subsection{Part (b)}\label{part-b-1}
+
+\includegraphics[width=1\linewidth]{skeleton_files/figure-latex/q2b-pruned-tree-1}
+\includegraphics[width=1\linewidth]{skeleton_files/figure-latex/q2b-pruned-tree-2}
+
+\subsection{Part (c)}\label{part-c}
+
+Analysing the both the pruned tree plot, we can't find the Licence type
+parameter being used in the decision making. We can therefore say that
+the Licence type has limited effect on the braking distance needed.
+
+\subsection{Part (d)}\label{part-d}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{set.seed}\NormalTok{(}\DecValTok{2025}\NormalTok{)}
+\NormalTok{design\_matrix }\OtherTok{\textless{}{-}} \FunctionTok{model.matrix}\NormalTok{(Distance }\SpecialCharTok{\textasciitilde{}}\NormalTok{ .,}\AttributeTok{data=}\NormalTok{braking\_data, }\AttributeTok{xlev=}\ConstantTok{FALSE}\NormalTok{)}
+\NormalTok{design\_matrix }\OtherTok{\textless{}{-}}\NormalTok{ design\_matrix[,}\DecValTok{2}\SpecialCharTok{:}\FunctionTok{ncol}\NormalTok{(design\_matrix)] }\CommentTok{\# Remove intercept}
+
+\NormalTok{Y }\OtherTok{\textless{}{-}}\NormalTok{ braking\_data}\SpecialCharTok{$}\NormalTok{Distance}
+\NormalTok{columns }\OtherTok{=} \FunctionTok{seq}\NormalTok{(}\DecValTok{1}\NormalTok{, }\FunctionTok{length}\NormalTok{(Y))}
+\NormalTok{train\_mask }\OtherTok{=} \FunctionTok{sample}\NormalTok{(columns, }\FunctionTok{length}\NormalTok{(Y) }\SpecialCharTok{*} \FloatTok{0.8}\NormalTok{)}
+
+\NormalTok{Y\_train }\OtherTok{=}\NormalTok{ Y[train\_mask]}
+\NormalTok{Y\_valid }\OtherTok{=}\NormalTok{ Y[}\SpecialCharTok{{-}}\NormalTok{train\_mask]}
+\NormalTok{X\_train }\OtherTok{=}\NormalTok{ design\_matrix[train\_mask,]}
+\NormalTok{X\_valid }\OtherTok{=}\NormalTok{ design\_matrix[}\SpecialCharTok{{-}}\NormalTok{train\_mask,]}
+\end{Highlighting}
+\end{Shaded}
+
+\subsection{Part (e)}\label{part-e}
+
+\includegraphics[width=1\linewidth]{skeleton_files/figure-latex/q2e-nn-unregularised-plots-1}
+
+From the gradient plot, it seems like the gradient has stopped
+decreasing, and hence reached a local minimum at around 4000 iterations.
+We can also see this from the objective plots. The objective values have
+also plateaued at around 4000 iterations.
+
+\subsection{Part (f)}\label{part-f}
+
+\includegraphics[width=1\linewidth]{skeleton_files/figure-latex/q2f-nn-regularised-plot-1}
+
+Using min(valid\_error), we found that the 9th regularisation term gives
+the lowest value. This value is 0.01174
+
+\subsection{Part (g)}\label{part-g}
+
+After selecting a regularization level, the training and validation data
+are combined before fitting the final model at that regularization level
+to maximize the use of all available data for training. This approach
+allows the model to learn from the full dataset, improving its
+generalization and predictive performance. The validation data, which
+was previously held out to tune the regularization parameter, is now
+included to provide more information for the final model fitting,
+leading to a more robust and accurate model.
+
+\section{Question 3: Model
+Predictions}\label{question-3-model-predictions}
+
+\subsection{Part (a)}\label{part-a-2}
+
+\includegraphics[width=1\linewidth]{skeleton_files/figure-latex/q3a-tree-predictions-1}
+\includegraphics[width=1\linewidth]{skeleton_files/figure-latex/q3a-tree-predictions-2}
+
+\subsection{Part (b)}\label{part-b-2}
+
+\includegraphics[width=1\linewidth]{skeleton_files/figure-latex/q3b-nn-predictions-1}
+
+\subsection{Part (c)}\label{part-c-1}
+
+Based on the plots, bRambo brakes consistently outperform the
+Competitor's, resulting in shorter stopping distances at all speeds. The
+driver's licence type was found to have a negligible effect on
+performance, while vehicle speed remains the most critical factor. The
+bRambo system's advantage is consistent across all scenarios, confirming
+its superior safety performance.
+
+\section{Question 4: K-Means
+Clustering}\label{question-4-k-means-clustering}
+
+\subsection{Part (a)}\label{part-a-3}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{set.seed}\NormalTok{(}\DecValTok{2025}\NormalTok{) }
+\NormalTok{k\_means }\OtherTok{=} \ControlFlowTok{function}\NormalTok{(X,K,iterations) \{}
+\NormalTok{   N     }\OtherTok{=} \FunctionTok{dim}\NormalTok{(X)[}\DecValTok{1}\NormalTok{]}
+\NormalTok{   d     }\OtherTok{=} \FunctionTok{dim}\NormalTok{(X)[}\DecValTok{2}\NormalTok{]}
+\NormalTok{   initial\_index }\OtherTok{=} \FunctionTok{sample}\NormalTok{(}\DecValTok{1}\SpecialCharTok{:}\NormalTok{N,K,}\AttributeTok{replace =} \ConstantTok{FALSE}\NormalTok{) }
+\NormalTok{   Mus   }\OtherTok{=}\NormalTok{  X[initial\_index,,drop}\OtherTok{=}\ConstantTok{FALSE}\NormalTok{] }
+\NormalTok{   ones  }\OtherTok{=} \FunctionTok{matrix}\NormalTok{(}\DecValTok{1}\NormalTok{,N,}\DecValTok{1}\NormalTok{) }
+\NormalTok{   dists }\OtherTok{=} \FunctionTok{matrix}\NormalTok{(}\DecValTok{0}\NormalTok{,N,K) }
+
+   \ControlFlowTok{for}\NormalTok{(i }\ControlFlowTok{in} \DecValTok{1}\SpecialCharTok{:}\NormalTok{iterations) \{}
+\NormalTok{      dists }\OtherTok{=}\NormalTok{ dists}\SpecialCharTok{*}\DecValTok{0}
+      \ControlFlowTok{for}\NormalTok{(k }\ControlFlowTok{in} \DecValTok{1}\SpecialCharTok{:}\NormalTok{K) \{}
+\NormalTok{           dists[,k] }\OtherTok{=} \FunctionTok{rowSums}\NormalTok{((X}\SpecialCharTok{{-}}\NormalTok{ones}\SpecialCharTok{\%*\%}\NormalTok{Mus[k,])}\SpecialCharTok{\^{}}\DecValTok{2}\NormalTok{) }
+\NormalTok{      \}}
+\NormalTok{      assigned\_labels }\OtherTok{=} \FunctionTok{apply}\NormalTok{(dists,}\DecValTok{1}\NormalTok{,which.min) }
+      
+      \ControlFlowTok{for}\NormalTok{(k }\ControlFlowTok{in} \DecValTok{1}\SpecialCharTok{:}\NormalTok{K) \{}
+       \ControlFlowTok{if}\NormalTok{(}\FunctionTok{any}\NormalTok{(assigned\_labels }\SpecialCharTok{==}\NormalTok{ k)) \{}
+\NormalTok{         wh }\OtherTok{=} \FunctionTok{which}\NormalTok{(assigned\_labels }\SpecialCharTok{==}\NormalTok{ k)}
+\NormalTok{         nk }\OtherTok{=} \FunctionTok{length}\NormalTok{(wh)}
+\NormalTok{         Mus[k,] }\OtherTok{=} \FunctionTok{colSums}\NormalTok{(X[wh,,}\AttributeTok{drop =}\ConstantTok{FALSE}\NormalTok{])}\SpecialCharTok{/}\NormalTok{nk}
+\NormalTok{       \} }\ControlFlowTok{else}\NormalTok{ \{}
+\NormalTok{         centroid\_dists }\OtherTok{=} \FunctionTok{apply}\NormalTok{(dists,}\DecValTok{1}\NormalTok{,min)}
+\NormalTok{         wh\_worst }\OtherTok{=} \FunctionTok{which.max}\NormalTok{(centroid\_dists)}
+\NormalTok{         Mus[k,]}\OtherTok{=}\NormalTok{ X[wh\_worst,]}
+\NormalTok{       \}}
+\NormalTok{      \}}
+\NormalTok{   \}}
+   
+\NormalTok{  SSQ }\OtherTok{\textless{}{-}} \DecValTok{0}
+  \ControlFlowTok{for}\NormalTok{ (i }\ControlFlowTok{in} \DecValTok{1}\SpecialCharTok{:}\FunctionTok{nrow}\NormalTok{(dists)) \{}
+\NormalTok{    k }\OtherTok{\textless{}{-}}\NormalTok{ assigned\_labels[i]}
+\NormalTok{    SSQ }\OtherTok{\textless{}{-}}\NormalTok{ SSQ }\SpecialCharTok{+}\NormalTok{ dists[i, k]}
+\NormalTok{  \}}
+ 
+   \FunctionTok{return}\NormalTok{(}\FunctionTok{list}\NormalTok{(}\AttributeTok{z =}\NormalTok{ assigned\_labels, }\AttributeTok{D =}\NormalTok{ dists, }\AttributeTok{K=}\NormalTok{ K, }\AttributeTok{SSQ =}\NormalTok{ SSQ))}
+\NormalTok{ \}}
+ 
+\NormalTok{res\_k\_means }\OtherTok{=} \FunctionTok{k\_means}\NormalTok{(}\FunctionTok{as.matrix}\NormalTok{(dat\_2), }\DecValTok{3}\NormalTok{, }\DecValTok{20}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\subsection{Part (b)}\label{part-b-3}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{SSC }\OtherTok{=} \ControlFlowTok{function}\NormalTok{(res\_k\_means)\{}
+  
+\NormalTok{  rk\_ordered }\OtherTok{=} \FunctionTok{t}\NormalTok{(}\FunctionTok{apply}\NormalTok{(res\_k\_means}\SpecialCharTok{$}\NormalTok{D, }\DecValTok{1}\NormalTok{, sort))}
+\NormalTok{  r1 }\OtherTok{=}\NormalTok{ rk\_ordered[,}\DecValTok{1}\NormalTok{]}
+\NormalTok{  r2 }\OtherTok{=}\NormalTok{ rk\_ordered[,}\DecValTok{2}\NormalTok{]}
+\NormalTok{  s }\OtherTok{=}\NormalTok{ (r2 }\SpecialCharTok{{-}}\NormalTok{ r1) }\SpecialCharTok{/}\NormalTok{ r2}
+  
+\NormalTok{  K }\OtherTok{\textless{}{-}} \FunctionTok{ncol}\NormalTok{(res\_k\_means}\SpecialCharTok{$}\NormalTok{D)}
+\NormalTok{  s\_bar\_k }\OtherTok{\textless{}{-}} \FunctionTok{numeric}\NormalTok{(K)}
+  \ControlFlowTok{for}\NormalTok{ (k }\ControlFlowTok{in} \DecValTok{1}\SpecialCharTok{:}\NormalTok{K) \{}
+\NormalTok{    s\_bar\_k[k] }\OtherTok{\textless{}{-}} \FunctionTok{mean}\NormalTok{(s[res\_k\_means}\SpecialCharTok{$}\NormalTok{z }\SpecialCharTok{==}\NormalTok{ k])}
+\NormalTok{  \}}
+  
+\NormalTok{  s\_bar\_overall }\OtherTok{\textless{}{-}} \FunctionTok{mean}\NormalTok{(s)}
+  
+  \FunctionTok{return}\NormalTok{(}\FunctionTok{list}\NormalTok{(}\AttributeTok{s =}\NormalTok{ s, }\AttributeTok{s\_bar\_k =}\NormalTok{ s\_bar\_k, }\AttributeTok{s\_bar\_overall =}\NormalTok{ s\_bar\_overall ))}
+\NormalTok{\}}
+
+\NormalTok{ssc }\OtherTok{=} \FunctionTok{SSC}\NormalTok{(res\_k\_means)}
+\end{Highlighting}
+\end{Shaded}
+
+\subsection{Part (c)}\label{part-c-2}
+
+\includegraphics[width=1\linewidth]{skeleton_files/figure-latex/q4c-find-k-1}
+\includegraphics[width=1\linewidth]{skeleton_files/figure-latex/q4c-find-k-2}
+
+Both the SSQ (elbow) and silhouette score plots suggest the optimal
+number of wine groupings is K=3. The elbow plot's curve flattens after
+K=3, and the silhouette score peaks at this value, indicating the most
+distinct and natural groupings in the data. For the retailer, this means
+that grouping the wines into 3 types is a viable strategy.
+
+\subsection{Part (d)}\label{part-d-1}
+
+\includegraphics[width=1\linewidth]{skeleton_files/figure-latex/q4d-separation-analysis-1}
+
+The groupings for K=3 are well separated. This is evidenced by the high
+overall average silhouette score, which peaks at K=3. Furthermore,
+analysing the average silhouette score for each individual cluster shows
+that all three groups have high scores, confirming that each cluster is
+dense and distinct from the others. Visual inspection of a 3D plot would
+further confirm the clear separation between the three colored point
+clouds, which we did using plotly but could not include in the report
+due to limitations with the pdf format.
+
+
+
+
+
+
+\end{document}

@@ -1,0 +1,315 @@
+
+\documentclass[12pt,halfline,a4paper,]{ouparticle}
+
+% Packages I think are necessary for basic Rmarkdown functionality
+\usepackage{hyperref}
+\usepackage{graphicx}
+\usepackage{listings}
+\usepackage{xcolor}
+\usepackage{fancyvrb}
+\usepackage{framed}
+
+% Link coloring
+\hypersetup{breaklinks=true,
+            bookmarks=true,
+            pdfauthor={},
+            pdftitle={STA304XS - Assignment 2: Machine Learning}
+            }
+
+
+%% To allow better options for figure placement
+%\usepackage{float}
+
+% Packages that are supposedly required by OUP sty file
+\usepackage{amssymb, amsmath, geometry, amsfonts, verbatim, endnotes, setspace}
+
+% use upquote if available, for straight quotes in verbatim environments
+\IfFileExists{upquote.sty}{\usepackage{upquote}}{}
+
+% Macros for dealing with affiliations, footnotes, etc.
+\makeatletter
+\def\Newlabel#1#2#3{\expandafter\gdef\csname #1@#2\endcsname{#3}}
+
+\def\Ref#1#2{\@ifundefined{#1@#2}{???}{\csname #1@#2\endcsname}}
+
+\newcommand*\samethanks[1][\value{footnote}]{\footnotemark[#1]}
+
+\newcommand*\ifcounter[1]{%
+  \ifcsname c@#1\endcsname
+    \expandafter\@firstoftwo
+  \else
+    \expandafter\@secondoftwo
+  \fi
+}
+
+\newcommand*\thanksbycode[1]{%
+  \ifcounter{FNCT@#1}
+    {\samethanks[\value{FNCT@#1}]}
+    {\thanks{\Ref{FN}{#1}}\newcounter{FNCT@#1}\setcounter{FNCT@#1}{\value{footnote}}}
+}
+
+% Create labels for Addresses if the are given in Elsevier format
+
+% Create labels for Footnotes if the are given in Elsevier format
+
+% Part for setting citation format package: natbib
+
+% Part for setting citation format package: biblatex
+
+
+% tightlist command for lists without linebreak
+\providecommand{\tightlist}{%
+  \setlength{\itemsep}{0pt}\setlength{\parskip}{0pt}}
+
+
+
+\usepackage{booktabs}
+
+\begin{document}
+
+\title{STA304XS - Assignment 2: Machine Learning}
+
+\author{%
+%
+% Code for old style authors field
+%
+% Add \and if both authors and author
+%
+%
+% Code for new (elsevier) style author field
+\name{Jing Yeh}
+%
+\email{\href{mailto:yhxjin001@myuct.ac.za}{yhxjin001@myuct.ac.za}}%
+%
+%
+%
+\and
+\name{Saurav Sathnarayan}
+%
+\email{\href{mailto:sthsau001@myuct.ac.za}{sthsau001@myuct.ac.za}}%
+%
+%
+%
+%
+}
+
+\abstract{}
+
+\date{2025-10-22}
+
+\keywords{}
+
+\maketitle
+
+
+
+\newpage
+\tableofcontents
+\newpage
+
+\subsection{Question 1 - BAYESIAN
+INTERPRETATION}\label{question-1---bayesian-interpretation}
+
+We start with the logistic regression model:
+
+\[\Pr(Y_i = 1 \mid x_i) = \text{logit}^{-1}(x_i^\top \beta) = \dfrac{1}{1 + \exp(-x_i^\top \beta)}.\]
+
+The log-likelihood for all \(n\) observations is
+
+\[l(\beta) = \sum_{i=1}^n \left[ y_i x_i^\top \beta - \log(1 + e^{x_i^\top \beta}) \right].\]
+
+Assume independent Normal priors for the coefficients:
+
+\[\beta_j \sim N(0, \tau^2), \quad j = 1, \ldots, p.\]
+
+Hence, the prior density is
+
+\[\pi(\beta) = \prod_{j=1}^p \dfrac{1}{\sqrt{2\pi\tau^2}}
+\exp\!\left(-\dfrac{\beta_j^2}{2\tau^2}\right)\]
+
+Taking logs, we obtain the log-prior:
+
+\[\log \pi(\beta) = -\dfrac{p}{2}\log(2\pi\tau^2)
+-\dfrac{1}{2\tau^2}\sum_{j=1}^p \beta_j^2\]
+
+Now, by Bayes' theorem,
+
+\[\pi(\beta \mid y) = \dfrac{\pi(y \mid \beta)\, \pi(\beta)}{\pi(y)}\]
+
+Taking logs of both sides gives
+
+\[\log \pi(\beta \mid y) = \log \pi(y \mid \beta) + \log \pi(\beta) - \log \pi(y)\]
+
+The term \(\log \pi(y)\) is a normalising constant that does not depend
+on \(\beta\), so when maximising over \(\beta\), it can be ignored.
+Therefore,
+
+\[\log \pi(\beta \mid y) \propto \log \pi(y \mid \beta) + \log \pi(\beta)\]
+
+Substituting the expressions for \(\log p(y \mid \beta)\) and
+\(\log p(\beta)\), we have
+
+\[\log p(\beta \mid y) \propto l(\beta) - \dfrac{1}{2\tau^2}\sum_{j=1}^p \beta_j^2\]
+
+This is the expression for the log-posterior up to a constant.
+
+To obtain the maximum a posteriori (MAP) estimate, we maximise
+\(\log p(\beta \mid y)\) with respect to \(\beta\). Equivalently, we
+minimise the negative log-posterior:
+
+\[\widehat{\beta}_{MAP} = \arg\min_\beta
+\left[ -l(\beta) + \dfrac{1}{2\tau^2}\sum_{j=1}^p \beta_j^2 \right]\]
+
+If we define \(\lambda = \dfrac{1}{2\tau^2}\), then the optimisation
+problem becomes
+
+\[\boxed{
+\widehat{\beta}_{MAP}
+= \arg\min_\beta \left[ -l(\beta) + \lambda \|\beta\|_2^2 \right]
+}\]
+
+This shows that the MAP estimator under a Normal prior is equivalent to
+the ridge-regularised logistic regression estimator, where the penalty
+parameter \(\lambda\) corresponds to the precision of the prior.
+
+\begin{enumerate}
+\def\labelenumi{(\alph{enumi})}
+\setcounter{enumi}{1}
+\tightlist
+\item
+\end{enumerate}
+
+\subsection{Question 2 - DERIVING
+RIDGE-IWLS}\label{question-2---deriving-ridge-iwls}
+
+\begin{enumerate}
+\def\labelenumi{(\alph{enumi})}
+\tightlist
+\item
+\end{enumerate}
+
+In IWLS, the weight for observation \(i\) is given by \[
+w_i^{(t)} = \frac{1}{\operatorname{Var}(Y_i)} \left(\frac{\partial \mu_i}{\partial \eta_i}\right)^2.
+\]
+
+For logistic regression, \(\operatorname{Var}(Y_i) = p_i (1 - p_i)\) and
+\(\frac{\partial \mu_i}{\partial \eta_i} = p_i (1 - p_i)\), so
+
+\[
+w_i^{(t)} = \frac{\left(p_i^{(t)} (1 - p_i^{(t)})\right)^2}{p_i^{(t)} (1 - p_i^{(t)})} 
+= p_i^{(t)} (1 - p_i^{(t)}).
+\]
+
+These are exactly the diagonal entries of the weight matrix:
+
+\[
+W^{(t)} = \operatorname{diag}\Big(p_1^{(t)} (1 - p_1^{(t)}), \dots, p_n^{(t)} (1 - p_n^{(t)})\Big).
+\]
+
+and \(p^{(t)} = (p_1^{(t)}, \dots, p_n^{(t)})^\top\) are the predicted
+probabilities at \(\beta^{(t)}\).
+
+and for \(z^{(t)}\)
+
+\[z_i^{(t)} = \eta_i^{(t)} + \frac{y_i - \mu_i^{(t)}}{\frac{\partial \mu_i}{\partial \eta_i}}\]
+
+where \[
+\eta_i^{(t)} = x_i^\top \beta^{(t)}, \quad \mu_i^{(t)} = \sigma(\eta_i^{(t)}) = p_i^{(t)}, \quad \frac{\partial \mu_i}{\partial \eta_i} = p_i^{(t)} (1 - p_i^{(t)}).
+\]
+
+Substituting the derivative for logistic regression gives
+
+\[
+z_i^{(t)} = x_i^\top \beta^{(t)} + \frac{y_i - p_i^{(t)}}{p_i^{(t)} (1 - p_i^{(t)})}.
+\]
+
+In matrix form, for all \(n\) observations:
+
+\[
+z^{(t)} = X \beta^{(t)} + (W^{(t)})^{-1} (y - p^{(t)}),
+\]
+
+From our IWLS formula, we have:
+
+\[ (\textbf{X}^T \textbf{W}^{(t)} \textbf{X})^{-1} \beta^{(t+1)} = \textbf{X}^T \textbf{W}^{(t)} z^{(t)} \]
+Thus,
+
+\[  \beta^{(t+1)} = (\textbf{X}^T \textbf{W}^{(t)} \textbf{X})^{-1}\textbf{X}^T \textbf{W}^{(t)} z^{(t)} \]
+(b)
+
+First we use the taylor expansion around \(l(\beta)\), which is: \[
+l(\beta) \approx l(\beta^{(t)}) 
++ (\beta - \beta^{(t)})^\top \nabla l(\beta^{(t)}) 
++ \frac{1}{2} (\beta - \beta^{(t)})^\top \nabla^2 f(\beta^{(t)}) (\beta - \beta^{(t)})
+\] where \[\nabla l(\beta^{(t)}) \] is the gradient vector.
+
+\(l(\beta) \approx l(\beta^{(t)}) + (\beta - \beta^{(t)})^\top \nabla l(\beta^{(t)}) + \frac{1}{2} (\beta - \beta^{(t)})^\top H^{(t)} (\beta - \beta^{(t)})\),
+
+where \(H^{(t)} = \nabla^2 l(\beta^{(t)})\) is the Hessian.
+
+For GLMs, the negative Hessian is often written as:
+
+\(-H^{(t)} = X^\top W^{(t)} X\),
+
+where \(W^{(t)}\) is the diagonal weight matrix.
+
+The penalized objective is:
+
+\(f(\beta) = -l(\beta) + \lambda \|\beta\|_2^2\).
+
+The gradient of the penalized objective is:
+
+\(\nabla f(\beta) = -\nabla l(\beta) + 2 \lambda \beta\),
+
+and the Hessian is:
+
+\(\nabla^2 f(\beta) = -\nabla^2 l(\beta) + 2 \lambda I = X^\top W^{(t)} X + 2 \lambda I\).
+
+The Newton-Raphson update for minimizing \(f(\beta)\) is:
+
+\(\beta^{(t+1)} = \beta^{(t)} - [\nabla^2 f(\beta^{(t)})]^{-1} \nabla f(\beta^{(t)})\).
+
+Plug in the gradient and Hessian:
+
+\(\beta^{(t+1)} = \beta^{(t)} - (X^\top W^{(t)} X + 2 \lambda I)^{-1} (-\nabla l(\beta^{(t)}) + 2 \lambda \beta^{(t)})\)
+
+\(= \beta^{(t)} + (X^\top W^{(t)} X + 2 \lambda I)^{-1} (\nabla l(\beta^{(t)}) - 2 \lambda \beta^{(t)})\).
+
+and the gradient satisfies:
+
+\(\nabla l(\beta^{(t)}) = X^\top (y - \mu^{(t)}) = X^\top W^{(t)} (z^{(t)} - X \beta^{(t)})\).
+
+Plugging this into the update:
+
+\(\beta^{(t+1)} = \beta^{(t)} + (X^\top W^{(t)} X + 2 \lambda I)^{-1} (X^\top W^{(t)} (z^{(t)} - X \beta^{(t)}) - 2 \lambda \beta^{(t)})\)
+
+\(= (X^\top W^{(t)} X + 2 \lambda I)^{-1} (X^\top W^{(t)} z^{(t)})\).
+
+\(\beta^{(t+1)} = (X^\top W^{(t)} X + 2 \lambda I)^{-1} X^\top W^{(t)} z^{(t)}\).
+
+\subsection{Question 3 - IMPLEMENTATION AND
+EVALUATION}\label{question-3---implementation-and-evaluation}
+
+\section{(a)}\label{a}
+
+\begin{verbatim}
+## $coefficients
+##                     [,1]
+## 1             0.05766608
+## Measurement1  0.16427287
+## Measurement2  0.67327480
+## Measurement3 -1.24407501
+## 
+## $iterations
+## [1] 9
+## 
+## $converged
+## [1] TRUE
+\end{verbatim}
+
+
+
+
+
+
+\end{document}
