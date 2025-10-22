@@ -22,12 +22,15 @@ knitr::opts_chunk$set(
   echo = FALSE,
   warning = FALSE,
   message = FALSE,
-  fig.pos = '!ht', # <-- Change this line
+  fig.pos = '!ht', # =- Change this line
   out.width = '100%', 
   dpi = 300
 )
 
 # Load all required packages
+library(knitr)
+library(kableExtra)
+library(glmnet)
 ```
 
 
@@ -37,6 +40,7 @@ knitr::opts_chunk$set(
 \newpage
 \tableofcontents
 \newpage
+
 ## Question 1 - BAYESIAN INTERPRETATION
 
 We start with the logistic regression model:
@@ -171,105 +175,175 @@ From our IWLS formula, we have:
 $$ (\textbf{X}^T \textbf{W}^{(t)} \textbf{X})^{-1} \beta^{(t+1)} = \textbf{X}^T \textbf{W}^{(t)} z^{(t)} $$
 Thus, 
 
-$$  \beta^{(t+1)} = (\textbf{X}^T \textbf{W}^{(t)} \textbf{X})^{-1}\textbf{X}^T \textbf{W}^{(t)} z^{(t)} $$
+$$\boxed{\beta^{(t+1)} = (\textbf{X}^T \textbf{W}^{(t)} \textbf{X})^{-1}\textbf{X}^T \textbf{W}^{(t)} z^{(t)}}   $$
 (b)
-
-First we use the taylor expansion around $l(\beta)$, which is:
-$$
-l(\beta) \approx l(\beta^{(t)}) 
-+ (\beta - \beta^{(t)})^\top \nabla l(\beta^{(t)}) 
-+ \frac{1}{2} (\beta - \beta^{(t)})^\top \nabla^2 f(\beta^{(t)}) (\beta - \beta^{(t)})
-$$
-where
-$$\nabla l(\beta^{(t)}) $$ is the gradient vector.
-
-
-$l(\beta) \approx l(\beta^{(t)}) + (\beta - \beta^{(t)})^\top \nabla l(\beta^{(t)}) + \frac{1}{2} (\beta - \beta^{(t)})^\top H^{(t)} (\beta - \beta^{(t)})$,  
-
-where $H^{(t)} = \nabla^2 l(\beta^{(t)})$ is the Hessian.  
-
-For GLMs, the negative Hessian is often written as:
-
-$-H^{(t)} = X^\top W^{(t)} X$,  
-
-where $W^{(t)}$ is the diagonal weight matrix.
-
-
-The penalized objective is:
-
-$f(\beta) = -l(\beta) + \lambda \|\beta\|_2^2$.  
-
-The gradient of the penalized objective is:
-
-$\nabla f(\beta) = -\nabla l(\beta) + 2 \lambda \beta$,  
-
-and the Hessian is:
-
-$\nabla^2 f(\beta) = -\nabla^2 l(\beta) + 2 \lambda I = X^\top W^{(t)} X + 2 \lambda I$.
-
-
-The Newton-Raphson update for minimizing $f(\beta)$ is:
-
-$\beta^{(t+1)} = \beta^{(t)} - [\nabla^2 f(\beta^{(t)})]^{-1} \nabla f(\beta^{(t)})$.  
-
-Plug in the gradient and Hessian:
-
-$\beta^{(t+1)} = \beta^{(t)} - (X^\top W^{(t)} X + 2 \lambda I)^{-1} (-\nabla l(\beta^{(t)}) + 2 \lambda \beta^{(t)})$  
-
-$= \beta^{(t)} + (X^\top W^{(t)} X + 2 \lambda I)^{-1} (\nabla l(\beta^{(t)}) - 2 \lambda \beta^{(t)})$.
-
-
-
-and the gradient satisfies:
-
-$\nabla l(\beta^{(t)}) = X^\top (y - \mu^{(t)}) = X^\top W^{(t)} (z^{(t)} - X \beta^{(t)})$.  
-
-Plugging this into the update:
-
-$\beta^{(t+1)} = \beta^{(t)} + (X^\top W^{(t)} X + 2 \lambda I)^{-1} (X^\top W^{(t)} (z^{(t)} - X \beta^{(t)}) - 2 \lambda \beta^{(t)})$  
-
-$= (X^\top W^{(t)} X + 2 \lambda I)^{-1} (X^\top W^{(t)} z^{(t)})$.
-
-
-$\beta^{(t+1)} = (X^\top W^{(t)} X + 2 \lambda I)^{-1} X^\top W^{(t)} z^{(t)}$.
+\newpage
 
 ## Question 3 - IMPLEMENTATION AND EVALUATION
-# (a)
+(a)
 
-```{r}
-dat = read.table(""~/Desktop/template/Assignment_Disease.txt"", header = TRUE)
+```{r include=FALSE}
+dat = read.table('~/Desktop/template/Assignment_Disease.txt', header = TRUE)
 attach(dat)
-Y <- dat$DiseaseStatus
-X <- as.matrix(cbind(1, dat[, c("Measurement1", "Measurement2", "Measurement3")]))
+Y = dat$DiseaseStatus
+X = as.matrix(cbind(1, dat[, c("Measurement1", "Measurement2", "Measurement3")]))
+n = length(Y)
+p = ncol(X)
 ```
 
-
-```{r}
-glm_fit <- function(Y, X, lambda = 1, esp = 1e-6, K = 100) {
-  n <- length(Y)
-  p <- ncol(X)
-  beta <- rep(0, p)
+```{r echo=TRUE}
+glm_fit = function(Y, X, lambda = 1, eps = 1e-6, K = 100) {
+  beta = rep(0, p)
   for (iter in 1:K) {
+    
     # Linear predictor
-    eta <- as.vector(X %*% beta)
+    eta = as.vector(X %*% beta)
+    
     # For logistic regression (binomial), use:
-    mu <- 1 / (1 + exp(-eta))
+    mu = 1 / (1 + exp(-eta))
     # Weights and working response
-    W <- diag(as.vector(mu * (1 - mu)), n, n)
-    z <- eta + (Y - mu) / (mu * (1 - mu))
-    # Ridge-IWLS update
-    XtWX <- t(X) %*% W %*% X
-    XtWz <- t(X) %*% W %*% z
-    beta_new <- solve(XtWX + 2 * lambda * diag(p), XtWz)
+    
+    W = diag(as.vector(mu * (1 - mu)), n, n)
+    z = eta + (Y - mu) / (mu * (1 - mu))
+    
+    # Lambda Scaling
+    P = diag(rep(lambda / n, p))
+    
+    # Ridge-IWLS updated
+    XtWX = t(X) %*% W %*% X
+    XtWz = t(X) %*% W %*% z
+    beta_new = solve(XtWX + 2 * lambda * diag(p), XtWz)
+    
     # Check convergence
-    if (sqrt(sum((beta_new - beta)^2)) < esp) break
-    beta <- beta_new
+    if (sqrt(sum((beta_new - beta)^2)) < eps) break
+    beta = beta_new
   }
   return = list(coefficients = beta, iterations = iter, converged = (iter < K))
 }
-
-
-fit <- glm_fit(Y, X, lambda = 1)
-fit
 ```
 
+```{r include=FALSE}
+fit = glm_fit(Y, X, lambda = 1)
+fit_glmnet = glmnet(X[,-1], Y, family = "binomial", alpha = 0, lambda = 1/n, intercept = TRUE, standardize = FALSE )
+```
+
+(b) & (c)
+
+### Estimates
+Looking at our estimates, we see that our intercepts are very different from each other. This is due to the fact that,in IWLS, our X matrix includes a column of ones and no centering/standardization is done. However, the glmnet package fits an intercept separately and standardises for us, even with standardize = FALSE, the intercept optimization is treated separately. Other differences in the magnitudes of coefficients are small. 
+
+```{r}
+#Ridge IWLS coefficients
+df <- data.frame(
+  Estimate = fit$coefficients
+)
+kable(df, format = "latex", booktabs = TRUE, caption = "Ridge IWLS - Coefficient estimates.") %>%
+  kable_styling(latex_options = "hold_position")
+
+# glmnet coefficients
+coefs <- as.matrix(coef(fit_glmnet))
+df2 <- data.frame(
+  Term = rownames(coefs),
+  Estimate = coefs[, 1]
+)
+kable(df2, format = "latex", booktabs = TRUE, caption = "Glmnet coefficient estimates.") %>%
+  kable_styling(latex_options = "hold_position")
+```
+
+### Prediction Performance
+
+
+```{r}
+
+# IWLS predictions
+eta_iwls = X %*% fit$coefficients
+p_iwls = 1 / (1 + exp(-eta_iwls))
+
+
+# glmnet predictions
+p_glmnet = predict(fit_glmnet,X[,-1], type = "response", s = 1/n)
+
+#mean squared error
+mse_iwls = mean((Y - p_iwls)^2)
+mse_glmnet = mean((Y - p_glmnet)^2)
+
+
+pred_df = data.frame(
+  Obs = 1:10,
+  Actual = Y[1:10],
+  IWLS_Pred = round(p_iwls[1:10], 4),
+  Glmnet_Pred = round(p_glmnet[1:10], 4)
+)
+
+# Display with kable
+kable(pred_df, format = "latex", booktabs = TRUE, caption = "Predicted probabilities: Ridge-IWLS vs. glmnet") %>%
+  kable_styling(latex_options = "hold_position", position = "center")
+
+
+perf <- data.frame(
+  Model = c("Ridge-IWLS", "glmnet"),
+  MSE = c(round(mse_iwls, 6), round(mse_glmnet, 6)))
+  kable(perf, format = "latex", booktabs = TRUE, caption = "Model performance comparison (MSE)") %>%
+  kable_styling(latex_options = "hold_position", position = "center")
+```
+
+
+Despite different intercepts, the predicted probabilities are be similar.
+Small differences in slopes and intercept can slightly shift the probabilities, but classification accuracy or nearly identical. In our tables of predicted probalities we have an 'Actual' Column which tells us the disease status of our observations.
+
+
+
+
+### Algorithmic Stability and Limitations of IWLS
+IWLS is slower for large p or n, because each iteration requires computing t(X) %*% W %*% X. While, glmnet uses coordinate descent, which is much faster and more memory-efficient for large datasets. IWLS is good small problems, but for large datasets, glmnet is preferable. Differences in intercept values are normal and expected due to centering, scaling, and optimization differences. With proper scaling and intercept handling, IWLS can approximate glmnet closely, especially for slope coefficients.
+
+## QUESTION 4 - BONUS: VISUALISATION AND ANALYSIS
+
+```{r}
+fit = glmnet(X[,-1], Y, family = "binomial",alpha = 0, intercept = TRUE, standardize = FALSE)
+plot(fit, xvar = "lambda", label = TRUE, main = 'Coeffcient shrinkage as Lambda increases')
+```
+
+A smaller -log($\lambda$) value indicates a larger penalty, therefore our coefficients reduce to zero, as -log($\lambda$) increases, our coefficients move to their true values.
+```{r}
+
+set.seed(2025)
+
+# Split into training and validation sets
+train_idx = sample(1:n, size = 0.7*n)
+X_train = X[train_idx, ]
+Y_train = Y[train_idx]
+X_val = X[-train_idx, ]
+Y_val = Y[-train_idx]
+
+# Fit Ridge (alpha = 0) over a sequence of lambda values
+fit = glmnet(X_train, Y_train, family = "binomial", alpha = 0, standardize = TRUE)
+
+# Lambda sequence
+lambda_seq = fit$lambda
+n_lambda = length(lambda_seq)
+
+# Initialize accuracy vectors
+train_acc = numeric(n_lambda)
+val_acc = numeric(n_lambda)
+
+# Compute training and validation accuracy for each lambda
+for (i in 1:n_lambda) {
+  pred_train = predict(fit, newx = X_train, s = lambda_seq[i], type = "response")
+  pred_val = predict(fit, newx = X_val, s = lambda_seq[i], type = "response")
+  
+  train_acc[i] = mean((pred_train > 0.5) == Y_train)
+  val_acc[i] = mean((pred_val > 0.5) == Y_val)
+}
+
+# Plot
+plot(-log(lambda_seq), train_acc, type = "l", col = "blue", lwd = 2,
+     xlab = "-log(lambda)", ylab = "Accuracy", ylim = c(0.5, 1),
+     main = "Training vs Validation Accuracy vs Lambda")
+lines(-log(lambda_seq), val_acc, col = "red", lwd = 2)
+legend("bottomright", legend = c("Training", "Validation"),
+       col = c("blue", "red"), lwd = 2)
+
+```
+
+To evaluate the effect of the regularization parameter  $\lambda$ on model performance, we computed predicted probabilities from both the Ridge-IWLS model and glmnet logistic regression across a sequence of $\lambda$ values. For each $\lambda$, the predicted probabilities were converted into binary class predictions using a threshold of 0.5, and accuracy was calculated separately on the training and validation sets. This procedure allows us to observe how increasing $\lambda$ (stronger regularization) shrinks the coefficients, reducing variance and preventing overfitting. Typically, training accuracy decreases as $\lambda$ increases due to the penalty constraining the model, while validation accuracy initially rises to a peak at an optimal $\lambda$ before declining as over-regularization induces underfitting. This analysis illustrates the bias–variance tradeoff and demonstrates how ridge regularization improves generalization compared to unpenalized logistic regression.
