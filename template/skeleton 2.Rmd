@@ -33,10 +33,6 @@ library(kableExtra)
 library(glmnet)
 ```
 
-
-```{r echo=FALSE, out.width="400px", fig.align='center'}
-
-```
 \newpage
 \tableofcontents
 \newpage
@@ -177,6 +173,123 @@ Thus,
 
 $$\boxed{\beta^{(t+1)} = (\textbf{X}^T \textbf{W}^{(t)} \textbf{X})^{-1}\textbf{X}^T \textbf{W}^{(t)} z^{(t)}}   $$
 (b)
+We are asked to derive the modified IWLS update formula for the Ridge-penalised objective function.
+
+1. Objective Function
+
+We start from the objective function to be minimised:
+$$
+F(\boldsymbol{\beta}) = -\ell(\boldsymbol{\beta}) + \lambda \|\boldsymbol{\beta}\|_2^2 = -\ell(\boldsymbol{\beta}) + \lambda \boldsymbol{\beta}^\top \boldsymbol{\beta}
+$$
+The Newton-Raphson update rule for minimising $F(\boldsymbol{\beta})$ is:
+$$
+\boldsymbol{\beta}^{(t+1)} = \boldsymbol{\beta}^{(t)} - [H_F(\boldsymbol{\beta}^{(t)})]^{-1} U_F(\boldsymbol{\beta}^{(t)})
+$$
+We need the gradient $U_F$ and the Hessian $H_F$ of our new objective function $F$.
+
+3. Gradient ($U_F$) and Hessian ($H_F$)
+
+From part a, we know:
+\begin{itemize}
+  \item Standard Score Vector: $U_{\ell} = \frac{\partial \ell}{\partial \boldsymbol{\beta}} = \mathbf{X}^\top (\mathbf{y} - \mathbf{p})$
+
+  \item Standard Score Vector: $U_{\ell} = \frac{\partial \ell}{\partial \boldsymbol{\beta}} = \mathbf{X}^\top (\mathbf{y} - \mathbf{p})$
+  
+  \item Standard Hessian: $H_{\ell} = \frac{\partial^2 \ell}{\partial \boldsymbol{\beta} \partial \boldsymbol{\beta}^\top} = -\mathbf{X}^\top \mathbf{W} \mathbf{X}$
+
+\end{itemize}
+
+Now, we find the derivatives for our penalised objective $F$:
+
+Gradient ($U_F$):
+
+$$U_F = \frac{\partial F}{\partial \boldsymbol{\beta}} = \frac{\partial}{\partial \boldsymbol{\beta}}(-\ell(\boldsymbol{\beta})) + \frac{\partial}{\partial \boldsymbol{\beta}}(\lambda \boldsymbol{\beta}^\top \boldsymbol{\beta})$$
+Using denominator layout for matrix calculus, we have:
+$$
+U_p = \frac{\partial f_p}{\partial \boldsymbol{\beta}} =
+  \begin{bmatrix}
+  \frac{\partial f_p}{\partial \beta_1} \\
+  \frac{\partial f_p}{\partial \beta_2} \\
+  \vdots \\
+  \frac{\partial f_p}{\partial \beta_p}
+  \end{bmatrix}
+  =
+  \begin{bmatrix}
+  2\lambda\beta_1 \\
+  2\lambda\beta_2 \\
+  \vdots \\
+  2\lambda\beta_p
+  \end{bmatrix}
+  = 2\lambda\boldsymbol{\beta}
+$$
+And thus:
+
+$$U_F = -U_{\ell} + 2\lambda\boldsymbol{\beta} = -\mathbf{X}^\top (\mathbf{y} - \mathbf{p}) + 2\lambda\boldsymbol{\beta}$$
+
+Hessian ($H_F$):
+
+$$H_F = \frac{\partial^2 F}{\partial \boldsymbol{\beta} \partial \boldsymbol{\beta}^\top} = \frac{\partial^2}{\partial \boldsymbol{\beta} \partial \boldsymbol{\beta}^\top}(-\ell(\boldsymbol{\beta})) + \frac{\partial^2}{\partial \boldsymbol{\beta} \partial \boldsymbol{\beta}^\top}(\lambda \boldsymbol{\beta}^\top \boldsymbol{\beta})$$
+Similarly, using matrix calculus, we get:
+$$
+  H_p = \frac{\partial U_p}{\partial \boldsymbol{\beta}^\top} =
+  \frac{\partial}{\partial \boldsymbol{\beta}^\top}
+  \begin{bmatrix}
+  2\lambda\beta_1 \\
+  \vdots \\
+  2\lambda\beta_p
+  \end{bmatrix}
+  =
+  \begin{bmatrix}
+  \frac{\partial (2\lambda\beta_1)}{\partial \beta_1} & \dots & \frac{\partial (2\lambda\beta_1)}{\partial \beta_p} \\
+  \vdots & \ddots & \vdots \\
+  \frac{\partial (2\lambda\beta_p)}{\partial \beta_1} & \dots & \frac{\partial (2\lambda\beta_p)}{\partial \beta_p}
+  \end{bmatrix}
+  =
+  \begin{bmatrix}
+  2\lambda & 0 & \dots & 0 \\
+  0 & 2\lambda & \dots & 0 \\
+  \vdots & \vdots & \ddots & \vdots \\
+  0 & 0 & \dots & 2\lambda
+  \end{bmatrix}
+  = 2\lambda\mathbf{I}
+$$
+Therefore, we have:
+
+$$H_F = -H_{\ell} + 2\lambda\mathbf{I} = (\mathbf{X}^\top \mathbf{W} \mathbf{X}) + 2\lambda\mathbf{I}$$
+
+4. Algebraic Simplification
+
+We substitute in the $\mathbf{H_F}$ and $\mathbf{U_F}$ we've derived.
+
+$$\boldsymbol{\beta}^{(t+1)} = \boldsymbol{\beta}^{(t)} - [H_F^{(t)}]^{-1} U_F^{(t)}$$
+
+Move $\boldsymbol{\beta}^{(t)}$ to the left and pre-multiply both sides by $H_F^{(t)}$:
+
+$$H_F^{(t)} (\boldsymbol{\beta}^{(t+1)} - \boldsymbol{\beta}^{(t)}) = - U_F^{(t)}$$
+
+Expand the left side:
+
+$$H_F^{(t)} \boldsymbol{\beta}^{(t+1)} - H_F^{(t)} \boldsymbol{\beta}^{(t)} = - U_F^{(t)}$$
+
+Isolate the $\boldsymbol{\beta}^{(t+1)}$ term:
+
+$$H_F^{(t)} \boldsymbol{\beta}^{(t+1)} = H_F^{(t)} \boldsymbol{\beta}^{(t)} - U_F^{(t)}$$
+
+Now, substitute the concrete expressions for $H_F^{(t)}$ and $U_F^{(t)}$ from Step 3:
+
+$$[\mathbf{X}^\top \mathbf{W}^{(t)} \mathbf{X} + 2\lambda\mathbf{I}] \boldsymbol{\beta}^{(t+1)} = [\mathbf{X}^\top \mathbf{W}^{(t)} \mathbf{X} + 2\lambda\mathbf{I}] \boldsymbol{\beta}^{(t)} - \left[ -\mathbf{X}^\top (\mathbf{y} - \mathbf{p}^{(t)}) + 2\lambda\boldsymbol{\beta}^{(t)} \right]$$
+Distribute the negative sign on the right-hand side and then cancel out the $2\lambda\boldsymbol{\beta}^{(t)}$ terms:
+$$
+[\mathbf{X}^\top \mathbf{W}^{(t)} \mathbf{X} + 2\lambda\mathbf{I}] \boldsymbol{\beta}^{(t+1)} = (\mathbf{X}^\top \mathbf{W}^{(t)} \mathbf{X})\boldsymbol{\beta}^{(t)} + \mathbf{X}^\top (\mathbf{y} - \mathbf{p}^{(t)})
+$$
+We recognise the right-hand side as the core expression from the standard IWLS update, which simplifies to $\mathbf{X}^\top \mathbf{W}^{(t)} \mathbf{z}^{(t)}$, where $\mathbf{z}^{(t)} = \mathbf{X}\boldsymbol{\beta}^{(t)} + (\mathbf{W}^{(t)})^{-1} (\mathbf{y} - \mathbf{p}^{(t)})$.
+
+$$[\mathbf{X}^\top \mathbf{W}^{(t)} \mathbf{X} + 2\lambda\mathbf{I}] \boldsymbol{\beta}^{(t+1)} = \mathbf{X}^\top \mathbf{W}^{(t)} \mathbf{z}^{(t)}$$
+
+Finally, isolate $\boldsymbol{\beta}^{(t+1)}$ to get the desired formula:
+
+$$\boldsymbol{\beta}^{(t+1)} = (\mathbf{X}^\top \mathbf{W}^{(t)} \mathbf{X} + 2\lambda\mathbf{I})^{-1} \mathbf{X}^\top \mathbf{W}^{(t)} \mathbf{z}^{(t)}$$
+
 \newpage
 
 ## Question 3 - IMPLEMENTATION AND EVALUATION
